@@ -1,0 +1,25 @@
+Windows Chrome	57.0.2987.133
+a.getDate()				22
+a.getDay()				6
+a.getFullYear()			2017
+a.getHours()			11
+a.getMilliseconds()		174
+a.getMinutes()			28
+a.getMonth()			3
+a.getSeconds()			55
+a.getTime()				1492885735174
+a.getTimezoneOffset()	420
+a.getUTCDate()			22
+a.getYear()				117
+a.toDateString()		"Sat Apr 22 2017"
+a.toGMTString()			"Sat, 22 Apr 2017 18:28:55 GMT"
+a.toISOString()			"2017-04-22T18:28:55.174Z"
+a.toJSON()				"2017-04-22T18:28:55.174Z"
+a.toLocaleDateString()	"4/22/2017"
+a.toLocaleString()		"4/22/2017, 11:28:55 AM"
+a.toLocaleTimeString()	"11:28:55 AM"
+a.toString()			"Sat Apr 22 2017 11:28:55 GMT-0700 (Pacific Daylight Time)"
+a.toTimeString()		"11:28:55 GMT-0700 (Pacific Daylight Time)"
+a.toUTCString()			"Sat, 22 Apr 2017 18:28:55 GMT"
+a.toLocaleString()		"4/22/2017, 11:28:55 AM"
+a.valueOf()				1492885735174
