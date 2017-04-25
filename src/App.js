@@ -16,6 +16,7 @@ class App extends Component {
       'addNewValue',
       'handleLogChange',
       'addLog',
+      'renameCurrentLog',
       'deleteCurrentLog',
     ].forEach(method => 
       this[method] = this[method].bind(this)
@@ -105,13 +106,35 @@ class App extends Component {
       }]}
     }));    
   }
+  // "Rename" button click handler
+  renameCurrentLog() {
+    if (this.state.currentLogIndex >= this.state.logs.length) {
+      // nothing valid currently selected
+      return;
+    }
+    var name = window.prompt("Enter new name for Log:",
+      this.state.logs[this.state.currentLogIndex].name);
+    name = name && name.trim();
+    if (!name) {
+      return;
+    }
+    this.setState(update(this.state, {
+      logs: {
+        [this.state.currentLogIndex]: {
+          name: {$set: name}
+        }
+      }
+    }));
+  }
   // "Delete" button click handler
   deleteCurrentLog() {
     if (this.state.currentLogIndex >= this.state.logs.length) {
       // nothing valid currently selected
       return;
     }
-    if (!window.confirm(`Are you sure you want to delete Log "${this.state.logs[this.state.currentLogIndex].name}"? This action cannot be undone.`)) {
+    if (!window.confirm(
+      `Are you sure you want to delete Log "${this.state.logs[this.state.currentLogIndex].name}"? This action cannot be undone.`
+    )) {
       return;
     }
     // Select the next or last Log.
@@ -196,6 +219,13 @@ class App extends Component {
                       {logs}
                     </select>
                   </label>
+                  <button
+                    onClick={this.renameCurrentLog}
+                    title="Change the name of this Log"
+                    disabled={!log}
+                    >
+                    Rename
+                  </button>
                   <button
                     onClick={this.deleteCurrentLog}
                     title="Remove this Log"
