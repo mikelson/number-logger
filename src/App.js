@@ -14,6 +14,7 @@ class App extends Component {
     [
       'handleNewValueChange',
       'addNewValue',
+      'handleLogChange',
     ].forEach(method => 
       this[method] = this[method].bind(this)
     );
@@ -30,6 +31,8 @@ class App extends Component {
         state.logs.forEach(log => 
           log.entries.forEach(remapTime)
         );
+        // Migrate old states with fields added later.
+        state.currentLogIndex |= 0;
       } catch (e) {
         console.error(e);
         console.log(state);
@@ -45,6 +48,8 @@ class App extends Component {
     this.state = state || {
       // Current value of the numeric input field
       newValue: "",
+      // Which Log is currently displayed
+      currentLogIndex: 0,
       logs: [
         {
           name: "initial log",
@@ -59,9 +64,38 @@ class App extends Component {
       ]
     }
   }
+  // Override setState to persist whenever state changes
+  setState(newState, callback) {
+    super.setState(newState, function() {
+      callback && callback();
+      // After updating Log, serialize and persist to local storage.
+      try {
+        const json = JSON.stringify(this.state);
+        localStorage.setItem("state", json);
+      } catch (e) {
+        console.error(e);
+      }
+    })
+  }
   // Value input mutator - https://facebook.github.io/react/docs/forms.html
   handleNewValueChange(e) {
     this.setState({newValue: e.target.value});
+  }
+  handleLogChange(e) {
+    const newIndex = e.target.value;
+    if (newIndex < this.state.logs.length) {
+      this.setState({currentLogIndex: newIndex});
+    } else {
+      // Outside current range: add a Log and make it current.
+      this.setState(update(this.state, {
+        currentLogIndex: {$set: this.state.logs.length},
+        logs: {$push: [{
+          name: "unnamed",
+          units: "#",
+          entries: [],
+        }]}
+      }));
+    }
   }
   // "Add" button click handler
   addNewValue() {
@@ -73,10 +107,9 @@ class App extends Component {
     }
     this.setState(update(this.state, {
       // Clear input, so user doesn't have to manually delete old value.
-      newValue: {$set: ""},      
+      newValue: {$set: ""},
       logs: {
-        // Currently just using one Log...
-        0: {
+        [this.state.currentLogIndex]: {
           entries: {
             // Push a new Entry to the Log.
             $push: [{
@@ -86,21 +119,25 @@ class App extends Component {
           }
         }
       }
-    }), function() {
-      // After updating Log, serialize and persist to local storage.
-      try {
-        const json = JSON.stringify(this.state);
-        localStorage.setItem("state", json);
-      } catch (e) {
-        console.error(e);
-      }
-    });
+    }));
   }
   render() {
-    // Currently just using one Log...
-    const log = this.state.logs[0];
+    // Make all the <option>s for the Log dropdown <select>.
+    const logs = this.state.logs.map((log, index) => (
+      <option value={index} key={index}>
+        {log.name}
+      </option>
+    ));
+    // Plus one more to make a new Log...
+    logs.push(
+      <option value={logs.length} key={logs.length}>
+        (Add a new Log...)
+      </option>
+    );
+
+    const log = this.state.logs[this.state.currentLogIndex];
     // Create each row of the table
-    const entries = log.entries.map(e => (
+    const entries = log && log.entries.map(e => (
       <tr key={e.time.getTime()}>
         <td>
           {e.time.toLocaleDateString()}
@@ -120,9 +157,17 @@ class App extends Component {
         </div>
         <div>
           <div className="App-intro">
-            Log: "{log.name}"
+            <label>
+              Current Log:
+              <select
+                value={this.state.currentLogIndex}
+                onChange={this.handleLogChange}
+                >
+                {logs}
+              </select>
+            </label>
           </div>
-          {entries.length > 0 &&
+          {entries && entries.length > 0 &&
             <table>
               <tbody>
                 <tr>
