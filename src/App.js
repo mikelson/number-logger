@@ -15,6 +15,8 @@ class App extends Component {
       'handleNewValueChange',
       'addNewValue',
       'handleLogChange',
+      'addLog',
+      'deleteCurrentLog',
     ].forEach(method => 
       this[method] = this[method].bind(this)
     );
@@ -81,21 +83,43 @@ class App extends Component {
   handleNewValueChange(e) {
     this.setState({newValue: e.target.value});
   }
+  // Log <select> dropdown change handler
   handleLogChange(e) {
-    const newIndex = e.target.value;
+    const newIndex = parseInt(e.target.value, 10);
     if (newIndex < this.state.logs.length) {
+      // Inside current range: select old Log.
       this.setState({currentLogIndex: newIndex});
     } else {
-      // Outside current range: add a Log and make it current.
-      this.setState(update(this.state, {
-        currentLogIndex: {$set: this.state.logs.length},
-        logs: {$push: [{
-          name: "unnamed",
-          units: "#",
-          entries: [],
-        }]}
-      }));
+      // Outside current range
+      this.addLog();
     }
+  }
+  // Create a new Log and make it current
+  addLog() {
+    this.setState(update(this.state, {
+      currentLogIndex: {$set: this.state.logs.length},
+      logs: {$push: [{
+        name: "unnamed",
+        units: "#",
+        entries: [],
+      }]}
+    }));    
+  }
+  // "Delete" button click handler
+  deleteCurrentLog() {
+    if (this.state.currentLogIndex >= this.state.logs.length) {
+      // nothing valid currently selected
+      return;
+    }
+    if (!window.confirm(`Are you sure you want to delete Log "${this.state.logs[this.state.currentLogIndex].name}"? This action cannot be undone.`)) {
+      return;
+    }
+    // Select the next or last Log.
+    const newIndex = Math.min(this.state.currentLogIndex, this.state.logs.length - 2);
+    this.setState(update(this.state, {
+      currentLogIndex: {$set: newIndex},
+      logs: {$splice: [[this.state.currentLogIndex, 1]]}
+    }));
   }
   // "Add" button click handler
   addNewValue() {
@@ -103,6 +127,9 @@ class App extends Component {
     const value = parseFloat(this.state.newValue);
     if (isNaN(value)) {
       console.warn(value + " is not a number, not logging");
+      return;
+    }
+    if (this.state.currentLogIndex >= this.state.logs.length) {
       return;
     }
     this.setState(update(this.state, {
@@ -157,15 +184,33 @@ class App extends Component {
         </div>
         <div>
           <div className="App-intro">
-            <label>
-              Current Log:
-              <select
-                value={this.state.currentLogIndex}
-                onChange={this.handleLogChange}
-                >
-                {logs}
-              </select>
-            </label>
+            {
+              this.state.logs.length ?
+                <div>
+                  <label>
+                    Current Log:
+                    <select
+                      value={this.state.currentLogIndex}
+                      onChange={this.handleLogChange}
+                      >
+                      {logs}
+                    </select>
+                  </label>
+                  <button
+                    onClick={this.deleteCurrentLog}
+                    title="Remove this Log"
+                    disabled={!log}
+                    >
+                    Delete
+                  </button>
+                </div>
+                :
+                <button
+                  onClick={this.addLog}
+                  >
+                  Add a new Log
+                </button>
+            }
           </div>
           {entries && entries.length > 0 &&
             <table>
@@ -179,22 +224,24 @@ class App extends Component {
               </tbody>
             </table>
           }
-          <label>
-            Add a Number:
-            <input
-              type="number"
-              inputMode="numeric"
-              value={this.state.newValue}
-              onChange={this.handleNewValueChange}
-              ref={input => input && input.focus()} 
-              autoFocus
-              />
-            <button
-              disabled={!this.state.newValue} 
-              onClick={this.addNewValue}>
-              Add
-            </button>
-          </label>
+          {log &&
+            <label>
+              Add a Number:
+              <input
+                type="number"
+                inputMode="numeric"
+                value={this.state.newValue}
+                onChange={this.handleNewValueChange}
+                ref={input => input && input.focus()} 
+                autoFocus
+                />
+              <button
+                disabled={!this.state.newValue} 
+                onClick={this.addNewValue}>
+                Add
+              </button>
+            </label>
+          }
         </div>
       </div>
     );
