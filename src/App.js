@@ -233,6 +233,7 @@ class App extends Component {
       const name = file.name.match(/^[^-.]+/)[0] || file.name;
       let units = file.name.match(/-([^.]+)/);
       units = (units && units[1]) || defaultUnits;
+      // Add the new log and set it to be current.
       context.setState(newState => update(newState, {
         currentLogIndex: {$set: newState.logs.length},
         logs: {$push: [{name, units, entries}]}
