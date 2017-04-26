@@ -18,6 +18,7 @@ class App extends Component {
       'addLog',
       'renameCurrentLog',
       'deleteCurrentLog',
+      'exportCurrentLog',
     ].forEach(method => 
       this[method] = this[method].bind(this)
     );
@@ -171,6 +172,31 @@ class App extends Component {
       }
     }));
   }
+  // Export the current Log as a TSV
+  exportCurrentLog() {
+    const log = this.state.logs[this.state.currentLogIndex];
+    if (!log) {
+      return;
+    }
+    // Make a string to write to the file. Just using newlines for line
+    // breaks, even though this might be downloaded to Windows...
+    const lineBreak = navigator.platform.startsWith("Win") ? "\r\n" : "\n";
+    const text = log.entries
+      .map(e => `${e.time.toJSON()}\t${e.value}`)
+      .reduce((prev, curr) => prev + curr + lineBreak, "");
+    // Make a file name that might allow reconstructing the Log "metadata".
+    const filename = `${log.name}-${log.units}.tsv`;
+
+    // Make hidden something with "download" attribute, force a click on it, and remove it.
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' 
+      + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  }
   render() {
     // Make all the <option>s for the Log dropdown <select>.
     const logs = this.state.logs.map((log, index) => (
@@ -232,6 +258,13 @@ class App extends Component {
                     disabled={!log}
                     >
                     Delete
+                  </button>
+                  <button
+                    onClick={this.exportCurrentLog}
+                    title="Save this Log as a file of tab-separated values"
+                    disabled={!log}
+                    >
+                    Export
                   </button>
                 </div>
                 :
