@@ -5,6 +5,8 @@ import update from 'immutability-helper';
 import React, { Component } from 'react';
 import './App.css';
 
+const defaultUnits = "#";
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -19,6 +21,8 @@ class App extends Component {
       'renameCurrentLog',
       'deleteCurrentLog',
       'exportCurrentLog',
+      'chooseAndImportFile',
+      'handleFileImport',
     ].forEach(method => 
       this[method] = this[method].bind(this)
     );
@@ -57,7 +61,7 @@ class App extends Component {
       logs: [
         {
           name: "initial log",
-          units: "#",
+          units: defaultUnits,
           entries: [
             // {
             //   time: new Date(1492838466707),
@@ -98,11 +102,11 @@ class App extends Component {
   }
   // Create a new Log and make it current
   addLog() {
-    this.setState(update(this.state, {
-      currentLogIndex: {$set: this.state.logs.length},
+    this.setState(newState => update(newState, {
+      currentLogIndex: {$set: newState.logs.length},
       logs: {$push: [{
         name: "unnamed",
-        units: "#",
+        units: defaultUnits,
         entries: [],
       }]}
     }));    
@@ -197,6 +201,44 @@ class App extends Component {
     element.click();
     document.body.removeChild(element);
   }
+  // Start the callback chain to import a local file.
+  chooseAndImportFile() {
+    // Create a hidden <input type="file"/>, force a click on it, and remove it.
+    // That way the screen verbiage associated with the file picking is cleaned up.
+    var element = document.createElement('input');
+    element.setAttribute('type', 'file');
+    element.onchange = this.handleFileImport;
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  }
+  // Read the first file from the event target and import it.
+  handleFileImport(e) {
+    const context = this;
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.readAsText(file, "UTF-8");
+    reader.onload = function(evt) {
+      // File loaded... parse it as TSV <Date>\t<Number>\n
+      const entries = evt.target.result
+        .split("\n")
+        .map(row => row.split("\t"))
+        .map(cells => ({
+          time: new Date(cells[0]), 
+          value: parseInt(cells[1], 10)
+        }))
+        .filter(e => !isNaN(e.time.valueOf()) && !isNaN(e.value));
+      // Parse Log metadata from file name, expected format <name>-<units>.tsv
+      const name = file.name.match(/^[^-.]+/)[0] || file.name;
+      let units = file.name.match(/-([^.]+)/);
+      units = (units && units[1]) || defaultUnits;
+      context.setState(newState => update(newState, {
+        currentLogIndex: {$set: newState.logs.length},
+        logs: {$push: [{name, units, entries}]}
+      }));
+    };
+  }
   render() {
     // Make all the <option>s for the Log dropdown <select>.
     const logs = this.state.logs.map((log, index) => (
@@ -233,47 +275,52 @@ class App extends Component {
         </div>
         <div>
           <div className="App-intro">
-            {
-              this.state.logs.length ?
-                <div>
-                  <label>
-                    Current Log:
-                    <select
-                      value={this.state.currentLogIndex}
-                      onChange={this.handleLogChange}
-                      >
-                      {logs}
-                    </select>
-                  </label>
-                  <button
-                    onClick={this.renameCurrentLog}
-                    title="Change the name of this Log"
-                    disabled={!log}
+            {this.state.logs.length ?
+              <div>
+                <label>
+                  Current Log:
+                  <select
+                    value={this.state.currentLogIndex}
+                    onChange={this.handleLogChange}
                     >
-                    Rename
-                  </button>
-                  <button
-                    onClick={this.deleteCurrentLog}
-                    title="Remove this Log"
-                    disabled={!log}
-                    >
-                    Delete
-                  </button>
-                  <button
-                    onClick={this.exportCurrentLog}
-                    title="Save this Log as a file of tab-separated values"
-                    disabled={!log}
-                    >
-                    Export
-                  </button>
-                </div>
-                :
+                    {logs}
+                  </select>
+                </label>
                 <button
-                  onClick={this.addLog}
+                  onClick={this.renameCurrentLog}
+                  title="Change the name of this Log"
+                  disabled={!log}
                   >
-                  Add a new Log
+                  Rename
                 </button>
+                <button
+                  onClick={this.deleteCurrentLog}
+                  title="Remove this Log"
+                  disabled={!log}
+                  >
+                  Delete
+                </button>
+                <button
+                  onClick={this.exportCurrentLog}
+                  title="Save this Log as a file of tab-separated values"
+                  disabled={!log}
+                  >
+                  Export
+                </button>
+              </div>
+              :
+              <button
+                onClick={this.addLog}
+                >
+                Add a new Log
+              </button>
             }
+            <button 
+              onClick={this.chooseAndImportFile} 
+              title="Choose a file of tab-separated values to add as a new Log"
+              >
+              Import
+            </button>
           </div>
           {entries && entries.length > 0 &&
             <table>
