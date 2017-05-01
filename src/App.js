@@ -3,7 +3,14 @@
 //
 import update from 'immutability-helper';
 import React, { Component } from 'react';
-import { Button, Table, Grid, Row, Col } from 'react-bootstrap';
+import {
+  PageHeader,
+  Button,
+  Table,
+  Grid,
+  Row,
+  Col,
+} from 'react-bootstrap';
 import './App.css';
 
 const defaultUnits = "#";
@@ -272,9 +279,9 @@ class App extends Component {
     ));
     return (
       <div className="App">
-        <div className="App-header">
-          <h2>Welcome to Number Logger</h2>
-        </div>
+        <PageHeader>
+          <small>Welcome to Number Logger</small>
+        </PageHeader>
         <div>
           <div className="App-intro">
             {this.state.logs.length ?
