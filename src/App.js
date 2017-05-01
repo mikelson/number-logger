@@ -3,7 +3,7 @@
 //
 import update from 'immutability-helper';
 import React, { Component } from 'react';
-import { Button } from 'react-bootstrap';
+import { Button, Table, Grid, Row, Col } from 'react-bootstrap';
 import './App.css';
 
 const defaultUnits = "#";
@@ -327,16 +327,22 @@ class App extends Component {
             </Button>
           </div>
           {entries && entries.length > 0 &&
-            <table>
-              <tbody>
-                <tr>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>{log.units}</th>
-                </tr>
-                {entries}
-              </tbody>
-            </table>
+            <Grid>
+              <Row>
+                <Col>
+                  <Table responsive bordered>
+                    <tbody>
+                      <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>{log.units}</th>
+                      </tr>
+                      {entries}
+                    </tbody>
+                  </Table>
+                </Col>
+              </Row>
+            </Grid>
           }
           {log &&
             <label>
