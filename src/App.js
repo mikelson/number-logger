@@ -293,19 +293,21 @@ class App extends Component {
                   title="Change the name of this Log"
                   disabled={!log}
                   >
-                  Rename
+                  Rename...
                 </Button>
                 <Button
                   onClick={this.deleteCurrentLog}
                   title="Remove this Log"
                   disabled={!log}
+                  bsStyle="warning"
                   >
-                  Delete
+                  Delete...
                 </Button>
                 <Button
                   onClick={this.exportCurrentLog}
                   title="Save this Log as a file of tab-separated values"
                   disabled={!log}
+                  bsStyle="link"
                   >
                   Export
                 </Button>
@@ -321,7 +323,7 @@ class App extends Component {
               onClick={this.chooseAndImportFile} 
               title="Choose a file of tab-separated values to add as a new Log"
               >
-              Import
+              Import...
             </Button>
           </div>
           {entries && entries.length > 0 &&
@@ -349,7 +351,9 @@ class App extends Component {
                 />
               <Button
                 disabled={!this.state.newValue} 
-                onClick={this.addNewValue}>
+                onClick={this.addNewValue}
+                bsStyle="primary"
+                >
                 Add
               </Button>
             </label>
