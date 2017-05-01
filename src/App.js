@@ -3,6 +3,7 @@
 //
 import update from 'immutability-helper';
 import React, { Component } from 'react';
+import { Button } from 'react-bootstrap';
 import './App.css';
 
 const defaultUnits = "#";
@@ -287,41 +288,41 @@ class App extends Component {
                     {logs}
                   </select>
                 </label>
-                <button
+                <Button
                   onClick={this.renameCurrentLog}
                   title="Change the name of this Log"
                   disabled={!log}
                   >
                   Rename
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={this.deleteCurrentLog}
                   title="Remove this Log"
                   disabled={!log}
                   >
                   Delete
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={this.exportCurrentLog}
                   title="Save this Log as a file of tab-separated values"
                   disabled={!log}
                   >
                   Export
-                </button>
+                </Button>
               </div>
               :
-              <button
+              <Button
                 onClick={this.addLog}
                 >
                 Add a new Log
-              </button>
+              </Button>
             }
-            <button 
+            <Button 
               onClick={this.chooseAndImportFile} 
               title="Choose a file of tab-separated values to add as a new Log"
               >
               Import
-            </button>
+            </Button>
           </div>
           {entries && entries.length > 0 &&
             <table>
@@ -346,11 +347,11 @@ class App extends Component {
                 ref={input => input && input.focus()} 
                 autoFocus
                 />
-              <button
+              <Button
                 disabled={!this.state.newValue} 
                 onClick={this.addNewValue}>
                 Add
-              </button>
+              </Button>
             </label>
           }
         </div>
