@@ -255,12 +255,6 @@ class App extends Component {
         {log.name}
       </option>
     ));
-    // Plus one more to make a new Log...
-    logs.push(
-      <option value={logs.length} key={logs.length}>
-        (Add a new Log...)
-      </option>
-    );
 
     const log = this.state.logs[this.state.currentLogIndex];
     // Create each row of the table
@@ -284,7 +278,19 @@ class App extends Component {
         </PageHeader>
         <div>
           <div className="App-intro">
-            {this.state.logs.length ?
+            <Button
+              onClick={this.addLog}
+              >
+              Add a new Log
+            </Button>
+            <Button 
+              onClick={this.chooseAndImportFile} 
+              title="Choose a file of tab-separated values to add as a new Log"
+              bsStyle='link'
+              >
+              Import...
+            </Button>
+            {this.state.logs.length > 0 &&
               <div>
                 <label>
                   Current Log:
@@ -295,6 +301,7 @@ class App extends Component {
                     {logs}
                   </select>
                 </label>
+                {' '}
                 <Button
                   onClick={this.renameCurrentLog}
                   title="Change the name of this Log"
@@ -302,6 +309,7 @@ class App extends Component {
                   >
                   Rename...
                 </Button>
+                {' '}
                 <Button
                   onClick={this.deleteCurrentLog}
                   title="Remove this Log"
@@ -319,19 +327,7 @@ class App extends Component {
                   Export
                 </Button>
               </div>
-              :
-              <Button
-                onClick={this.addLog}
-                >
-                Add a new Log
-              </Button>
             }
-            <Button 
-              onClick={this.chooseAndImportFile} 
-              title="Choose a file of tab-separated values to add as a new Log"
-              >
-              Import...
-            </Button>
           </div>
           {entries && entries.length > 0 &&
             <Grid>
