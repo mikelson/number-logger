@@ -293,7 +293,7 @@ class App extends Component {
             {this.state.logs.length > 0 &&
               <div>
                 <label>
-                  Current Log:
+                  Choose Log:
                   <select
                     value={this.state.currentLogIndex}
                     onChange={this.handleLogChange}
@@ -301,34 +301,34 @@ class App extends Component {
                     {logs}
                   </select>
                 </label>
-                {' '}
-                <Button
-                  onClick={this.renameCurrentLog}
-                  title="Change the name of this Log"
-                  disabled={!log}
-                  >
-                  Rename...
-                </Button>
-                {' '}
-                <Button
-                  onClick={this.deleteCurrentLog}
-                  title="Remove this Log"
-                  disabled={!log}
-                  bsStyle="warning"
-                  >
-                  Delete...
-                </Button>
-                <Button
-                  onClick={this.exportCurrentLog}
-                  title="Save this Log as a file of tab-separated values"
-                  disabled={!log}
-                  bsStyle="link"
-                  >
-                  Export
-                </Button>
               </div>
             }
           </div>
+          {log &&
+            <div>
+              <Button
+                onClick={this.renameCurrentLog}
+                title="Change the name of this Log"
+                >
+                Rename...
+              </Button>
+              {' '}
+              <Button
+                onClick={this.deleteCurrentLog}
+                title="Remove this Log"
+                bsStyle="warning"
+                >
+                Delete...
+              </Button>
+              <Button
+                onClick={this.exportCurrentLog}
+                title="Save this Log as a file of tab-separated values"
+                bsStyle="link"
+                >
+                Export
+              </Button>
+            </div>
+          }
           {entries && entries.length > 0 &&
             <Grid>
               <Row>
