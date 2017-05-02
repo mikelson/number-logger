@@ -24,6 +24,7 @@ class App extends Component {
     // https://facebook.github.io/react/docs/handling-events.html
     [
       'handleNewValueChange',
+      'handleNewValueKeyDown',
       'addNewValue',
       'handleLogChange',
       'addLog',
@@ -227,6 +228,12 @@ class App extends Component {
       logs: {$splice: [[this.state.currentLogIndex, 1]]}
     }));
   }
+  // Enter/Return key should add the new value
+  handleNewValueKeyDown(e) {
+    if (e.keyCode === 13) {
+      this.addNewValue();
+    }
+  }
   // "Add" button click handler
   addNewValue() {
     // Validate the input, in case browser somehow let a non-number through.
@@ -423,6 +430,7 @@ class App extends Component {
               inputMode="numeric"
               value={this.state.newValue}
               onChange={this.handleNewValueChange}
+              onKeyDown={this.handleNewValueKeyDown}
               ref={input => input && input.focus()} 
               autoFocus
               />
