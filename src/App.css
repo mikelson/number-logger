@@ -2,8 +2,12 @@
   text-align: center;
 }
 
-.App-intro {
-  font-size: large;
+.Row {
+  margin-bottom: 0.5em;
+}
+
+.LogSelect {
+  min-width: 20em;
 }
 
 th {

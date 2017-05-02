@@ -276,99 +276,96 @@ class App extends Component {
         <PageHeader>
           <small>Welcome to Number Logger</small>
         </PageHeader>
-        <div>
-          <div className="App-intro">
-            <Button
-              onClick={this.addLog}
-              >
-              Add a new Log
-            </Button>
-            <Button 
-              onClick={this.chooseAndImportFile} 
-              title="Choose a file of tab-separated values to add as a new Log"
-              bsStyle='link'
-              >
-              Import...
-            </Button>
-            {this.state.logs.length > 0 &&
-              <div>
-                <label>
-                  Choose Log:
-                  <select
-                    value={this.state.currentLogIndex}
-                    onChange={this.handleLogChange}
-                    >
-                    {logs}
-                  </select>
-                </label>
-              </div>
-            }
-          </div>
-          {log &&
-            <div>
-              <Button
-                onClick={this.renameCurrentLog}
-                title="Change the name of this Log"
-                >
-                Rename...
-              </Button>
-              {' '}
-              <Button
-                onClick={this.deleteCurrentLog}
-                title="Remove this Log"
-                bsStyle="warning"
-                >
-                Delete...
-              </Button>
-              <Button
-                onClick={this.exportCurrentLog}
-                title="Save this Log as a file of tab-separated values"
-                bsStyle="link"
-                >
-                Export
-              </Button>
-            </div>
-          }
-          {entries && entries.length > 0 &&
-            <Grid>
-              <Row>
-                <Col>
-                  <Table responsive bordered>
-                    <tbody>
-                      <tr>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>{log.units}</th>
-                      </tr>
-                      {entries}
-                    </tbody>
-                  </Table>
-                </Col>
-              </Row>
-            </Grid>
-          }
-          {log &&
-            <label>
-              Add a Number:
-              <input
-                type="number"
-                inputMode="numeric"
-                value={this.state.newValue}
-                onChange={this.handleNewValueChange}
-                ref={input => input && input.focus()} 
-                autoFocus
-                />
-              <Button
-                disabled={!this.state.newValue} 
-                onClick={this.addNewValue}
-                bsStyle="primary"
-                >
-                Add
-              </Button>
-            </label>
-          }
+        <div className="Row">
+          <Button
+            onClick={this.addLog}
+            >
+            Add a new Log
+          </Button>
+          <Button 
+            onClick={this.chooseAndImportFile} 
+            title="Choose a file of tab-separated values to add as a new Log"
+            bsStyle='link'
+            >
+            Import...
+          </Button>
         </div>
-      </div>
+        {this.state.logs.length > 0 &&
+          <label className="Row">
+            Choose Log:
+            <select
+              value={this.state.currentLogIndex}
+              onChange={this.handleLogChange}
+              className="LogSelect"
+              >
+              {logs}
+            </select>
+          </label>
+        }
+        {log &&
+          <div className="Row">
+            <Button
+              onClick={this.renameCurrentLog}
+              title="Change the name of this Log"
+              >
+              Rename...
+            </Button>
+            {' '}
+            <Button
+              onClick={this.deleteCurrentLog}
+              title="Remove this Log"
+              bsStyle="warning"
+              >
+              Delete...
+            </Button>
+            <Button
+              onClick={this.exportCurrentLog}
+              title="Save this Log as a file of tab-separated values"
+              bsStyle="link"
+              >
+              Export
+            </Button>
+          </div>
+        }
+        {entries && entries.length > 0 &&
+          <Grid>
+            <Row>
+              <Col>
+                <Table responsive bordered>
+                  <tbody>
+                    <tr>
+                      <th>Date</th>
+                      <th>Time</th>
+                      <th>{log.units}</th>
+                    </tr>
+                    {entries}
+                  </tbody>
+                </Table>
+              </Col>
+            </Row>
+          </Grid>
+        }
+        {log &&
+          <label>
+            Add a Number:
+            <input
+              type="number"
+              inputMode="numeric"
+              value={this.state.newValue}
+              onChange={this.handleNewValueChange}
+              ref={input => input && input.focus()} 
+              autoFocus
+              />
+            <Button
+              disabled={!this.state.newValue} 
+              onClick={this.addNewValue}
+              bsStyle="primary"
+              >
+              Add
+            </Button>
+          </label>
+        }
+      </div> // App
     );
   }
 }
