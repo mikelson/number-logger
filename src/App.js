@@ -52,7 +52,7 @@ class App extends Component {
         );
         // Migrate old states with fields added later.
         state.currentLogIndex |= 0;
-        state.isShowingModal = state.isShowingModal || {};
+        state.isShowingModal = {};
       } catch (e) {
         console.error(e);
         console.log(state);
@@ -86,13 +86,20 @@ class App extends Component {
       ]
     }
   }
+  // Only serialize state we want to persist, not emphemeral stuff like modals
+  filterTransientUiState(key, value) {
+    if (key === 'isShowingModal') {
+      return undefined;
+    }
+    return value;
+  }
   // Override setState to persist whenever state changes
   setState(newState, callback) {
     super.setState(newState, function() {
       callback && callback();
-      // After updating Log, serialize and persist to local storage.
+      // After updating state, serialize and persist to local storage.
       try {
-        const json = JSON.stringify(this.state);
+        const json = JSON.stringify(this.state, this.filterTransientUiState);
         localStorage.setItem("state", json);
       } catch (e) {
         console.error(e);
