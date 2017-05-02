@@ -27,13 +27,17 @@ class App extends Component {
       'addNewValue',
       'handleLogChange',
       'addLog',
+      'handleNewLogNameChange',
+      'handleNewLogNameKeyDown',
       'renameCurrentLog',
+      'showModalRenameCurrentLog',
+      'hideModalRenameCurrentLog',
       'showModalDeleteCurrentLog',
+      'hideModalDeleteCurrentLog',
       'exportCurrentLog',
       'chooseAndImportFile',
       'handleFileImport',
       'deleteCurrentLog',
-      'hideModalDeleteCurrentLog',
     ].forEach(method => 
       this[method] = this[method].bind(this)
     );
@@ -52,7 +56,6 @@ class App extends Component {
         );
         // Migrate old states with fields added later.
         state.currentLogIndex |= 0;
-        state.isShowingModal = {};
       } catch (e) {
         console.error(e);
         console.log(state);
@@ -66,8 +69,6 @@ class App extends Component {
     // Each Log has an an array of "Entries". Entries are ordered by time, so
     // using an array makes sense. Each Entry has a time stamp and a number value.
     this.state = state || {
-      // Which modal popup dialogs are visible?
-      isShowingModal: {},
       // Current value of the numeric input field
       newValue: "",
       // Which Log is currently displayed
@@ -84,11 +85,21 @@ class App extends Component {
           ]
         }
       ]
-    }
+    };
+      // Which modal popup dialogs are visible?
+    // eslint-disable-next-line
+    this.state.isShowingModal = {
+      deleteCurrentLog: false,
+      renameCurrentLog: false,
+    };
+    // Current value of new Log name field
+    // eslint-disable-next-line
+    this.state.newLogName = "";
   }
   // Only serialize state we want to persist, not emphemeral stuff like modals
   filterTransientUiState(key, value) {
-    if (key === 'isShowingModal') {
+    if (key === 'isShowingModal' ||
+        key === 'newLogName') {
       return undefined;
     }
     return value;
@@ -132,19 +143,52 @@ class App extends Component {
       }]}
     }));    
   }
-  // "Rename" button click handler
+  // Main "Rename" button click handler
+  showModalRenameCurrentLog() {
+    this.setState(newState => {
+      const log = newState.logs[newState.currentLogIndex];
+      if (log) {
+        // something valid currently selected
+        return update(newState, {
+          // Initialize the name buffer to the old name
+          newLogName: {$set: log.name},
+          isShowingModal: {renameCurrentLog: {$set: true}}
+        });
+      }
+      return newState;
+    });
+  }
+  // Handler for hiding "Rename Log" modal
+  hideModalRenameCurrentLog() {
+    this.setState(update(this.state, {
+      newLogName: {$set: ""},
+      isShowingModal: {renameCurrentLog: {$set: false}}
+    }));
+  }
+  // Value input mutator - https://facebook.github.io/react/docs/forms.html
+  handleNewLogNameChange(e) {
+    this.setState({newLogName: e.target.value});
+  }
+  handleNewLogNameKeyDown(e) {
+    if (e.keyCode === 13) {
+      this.renameCurrentLog();
+    };
+  }
+  // Modal are-you-sure "Rename" button click handler
   renameCurrentLog() {
     if (this.state.currentLogIndex >= this.state.logs.length) {
       // nothing valid currently selected
       return;
     }
-    var name = window.prompt("Enter new name for Log:",
-      this.state.logs[this.state.currentLogIndex].name);
+    var name = this.state.newLogName;
     name = name && name.trim();
     if (!name) {
+      this.hideModalRenameCurrentLog();
       return;
     }
     this.setState(update(this.state, {
+      isShowingModal: {renameCurrentLog: {$set: false}},
+      newLogName: {$set: ""},
       logs: {
         [this.state.currentLogIndex]: {
           name: {$set: name}
@@ -162,6 +206,10 @@ class App extends Component {
       this.setShowingModalDeleteCurrentLog(true);
     }
   }
+  // Handler for hiding "Delete Log" modal
+  hideModalDeleteCurrentLog() {
+    this.setShowingModalDeleteCurrentLog(false);
+  }
   // Modal are-you-sure "Delete" button click handler
   deleteCurrentLog() {
     if (this.state.currentLogIndex >= this.state.logs.length) {
@@ -178,10 +226,6 @@ class App extends Component {
       // Actually remove the Log from the logs array
       logs: {$splice: [[this.state.currentLogIndex, 1]]}
     }));
-  }
-  // Handler for hiding "Delete Log" modal
-  hideModalDeleteCurrentLog() {
-    this.setShowingModalDeleteCurrentLog(false);
   }
   // "Add" button click handler
   addNewValue() {
@@ -331,7 +375,7 @@ class App extends Component {
         {log &&
           <div className="Row">
             <Button
-              onClick={this.renameCurrentLog}
+              onClick={this.showModalRenameCurrentLog}
               title="Change the name of this Log"
               >
               Rename...
@@ -406,6 +450,31 @@ class App extends Component {
             <Modal.Footer>
               <Button onClick={this.deleteCurrentLog}>Delete</Button>
               <Button onClick={this.hideModalDeleteCurrentLog} autoFocus>Cancel</Button>
+            </Modal.Footer>
+          </Modal>
+        }
+        {log &&
+          <Modal
+            show={this.state.isShowingModal.renameCurrentLog}
+            onHide={this.hideModalRenameCurrentLog}
+            >
+            <Modal.Header closeButton>
+              <Modal.Title>Rename Log</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              The old Log name is "{log.name}". Enter your new Log name here: 
+              <input
+                type="text"
+                value={this.state.newLogName}
+                onChange={this.handleNewLogNameChange}
+                onKeyDown={this.handleNewLogNameKeyDown}
+                ref={input => input && input.focus()} 
+                autoFocus
+                />
+            </Modal.Body>
+            <Modal.Footer>
+              <Button onClick={this.renameCurrentLog}>Apply</Button>
+              <Button onClick={this.hideModalRenameCurrentLog}>Cancel</Button>
             </Modal.Footer>
           </Modal>
         }
