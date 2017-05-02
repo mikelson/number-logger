@@ -356,6 +356,7 @@ class App extends Component {
               ref={input => input && input.focus()} 
               autoFocus
               />
+            {' '}
             <Button
               disabled={!this.state.newValue} 
               onClick={this.addNewValue}
