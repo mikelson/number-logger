@@ -10,6 +10,7 @@ import {
   Grid,
   Row,
   Col,
+  Modal,
 } from 'react-bootstrap';
 import './App.css';
 
@@ -27,10 +28,12 @@ class App extends Component {
       'handleLogChange',
       'addLog',
       'renameCurrentLog',
-      'deleteCurrentLog',
+      'showModalDeleteCurrentLog',
       'exportCurrentLog',
       'chooseAndImportFile',
       'handleFileImport',
+      'deleteCurrentLog',
+      'hideModalDeleteCurrentLog',
     ].forEach(method => 
       this[method] = this[method].bind(this)
     );
@@ -49,6 +52,7 @@ class App extends Component {
         );
         // Migrate old states with fields added later.
         state.currentLogIndex |= 0;
+        state.isShowingModal = state.isShowingModal || {};
       } catch (e) {
         console.error(e);
         console.log(state);
@@ -62,6 +66,8 @@ class App extends Component {
     // Each Log has an an array of "Entries". Entries are ordered by time, so
     // using an array makes sense. Each Entry has a time stamp and a number value.
     this.state = state || {
+      // Which modal popup dialogs are visible?
+      isShowingModal: {},
       // Current value of the numeric input field
       newValue: "",
       // Which Log is currently displayed
@@ -139,23 +145,36 @@ class App extends Component {
       }
     }));
   }
-  // "Delete" button click handler
+  setShowingModalDeleteCurrentLog(value) {
+      this.setState(update(this.state, {isShowingModal: {deleteCurrentLog: {$set: value}}}));
+  }
+  // Main "Delete" button click handler
+  showModalDeleteCurrentLog() {
+    if (this.state.currentLogIndex < this.state.logs.length) {
+      // something valid currently selected
+      this.setShowingModalDeleteCurrentLog(true);
+    }
+  }
+  // Modal are-you-sure "Delete" button click handler
   deleteCurrentLog() {
     if (this.state.currentLogIndex >= this.state.logs.length) {
-      // nothing valid currently selected
-      return;
-    }
-    if (!window.confirm(
-      `Are you sure you want to delete Log "${this.state.logs[this.state.currentLogIndex].name}"? This action cannot be undone.`
-    )) {
+      // sanity check, should not happen
       return;
     }
     // Select the next or last Log.
     const newIndex = Math.min(this.state.currentLogIndex, this.state.logs.length - 2);
     this.setState(update(this.state, {
+      // Hide the modal
+      isShowingModal: {deleteCurrentLog: {$set: false}},
+      // Update the selected Log
       currentLogIndex: {$set: newIndex},
+      // Actually remove the Log from the logs array
       logs: {$splice: [[this.state.currentLogIndex, 1]]}
     }));
+  }
+  // Handler for hiding "Delete Log" modal
+  hideModalDeleteCurrentLog() {
+    this.setShowingModalDeleteCurrentLog(false);
   }
   // "Add" button click handler
   addNewValue() {
@@ -312,7 +331,7 @@ class App extends Component {
             </Button>
             {' '}
             <Button
-              onClick={this.deleteCurrentLog}
+              onClick={this.showModalDeleteCurrentLog}
               title="Remove this Log"
               bsStyle="warning"
               >
@@ -365,6 +384,23 @@ class App extends Component {
               Add
             </Button>
           </label>
+        }
+        {log &&
+          <Modal
+            show={this.state.isShowingModal.deleteCurrentLog}
+            onHide={this.hideModalDeleteCurrentLog}
+            >
+            <Modal.Header closeButton>
+              <Modal.Title>Delete Log?</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              Are you sure you want to delete Log "{log.name}"? This action cannot be undone.
+            </Modal.Body>
+            <Modal.Footer>
+              <Button onClick={this.deleteCurrentLog}>Delete</Button>
+              <Button onClick={this.hideModalDeleteCurrentLog} autoFocus>Cancel</Button>
+            </Modal.Footer>
+          </Modal>
         }
       </div> // App
     );
